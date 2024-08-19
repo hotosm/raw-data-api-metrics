@@ -1,0 +1,62 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.form-group {
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+input,
+select {
+  width: 100%;
+  padding: 8px;
+}
+button {
+  padding: 10px 15px;
+  background-color: #aa2d2d;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+#chartContainer {
+  margin-top: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background-color: #f2f2f2;
+}
+#userInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+#userInfo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+#metricSelectors {
+  margin-top: 15px;
+}
+.metric-checkbox {
+  margin-right: 10px;
+}
