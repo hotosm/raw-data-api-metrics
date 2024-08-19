@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raw Data API Metrics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 8px;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #aa2d2d;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      #chartContainer {
+        margin-top: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      #userInfo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      #userInfo img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+      #metricSelectors {
+        margin-top: 15px;
+      }
+      .metric-checkbox {
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Raw Data Metrics</h1>
+      <div id="loginSection">
+        <div id="loginForm">
+          <div class="form-group">
+            <label for="accessToken">Access Token:</label>
+            <input
+              type="text"
+              id="accessToken"
+              placeholder="Enter your access token"
+            />
+          </div>
+          <button onclick="login()">Login</button>
+        </div>
+        <div id="userInfo" style="display: none">
+          <img id="userImage" src="" alt="Profile Picture" />
+          <span id="userName"></span>
+          <button onclick="logout()" style="margin-left: 10px">Logout</button>
+        </div>
+      </div>
+      <div id="dataSection" style="display: none">
+        <div class="form-group">
+          <label for="quickDateSelect">Select Date Range:</label>
+          <select id="quickDateSelect" onchange="updateDateRange()">
+            <option value="day" selected>Last Day</option>
+            <option value="month">Last Month</option>
+            <option value="quarter">Last Quarter</option>
+            <option value="year">Last Year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="startDate">Start Date:</label>
+          <input type="date" id="startDate" />
+        </div>
+        <div class="form-group">
+          <label for="endDate">End Date:</label>
+          <input type="date" id="endDate" />
+        </div>
+        <div class="form-group">
+          <label for="groupBy">Group By:</label>
+          <select id="groupBy">
+            <option value="day">Day</option>
+            <option value="month" selected>Month</option>
+            <option value="quarter">Quarter</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+
+        <button onclick="fetchData()">Fetch Data</button>
+        <div class="form-group">
+          <label for="metricSelector">Select Metric:</label>
+          <select id="metricSelector" onchange="updateChart()"></select>
+        </div>
+        <div id="chartContainer"></div>
+        <div id="tableContainer"></div>
+        <button onclick="downloadCSV()" id="downloadBtn" style="display: none">
+          Download CSV
+        </button>
+      </div>
+    </div>
+    <script>
+      const apiBaseUrl = "https://api-prod.raw-data.hotosm.org/v1";
+      let chartData = [];
+      let chart;
+
+      function login() {
+        const token = document.getElementById("accessToken").value;
+        if (token) {
+          localStorage.setItem("rawdatApiOsmAccessToken", token);
+          fetchUserInfo(token);
+        } else {
+          alert("Please enter a valid token.");
+        }
+      }
+
+      function fetchUserInfo(token) {
+        fetch(`${apiBaseUrl}/auth/me/`, {
+          headers: {
+            accept: "application/json",
+            "access-token": token,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("userImage").src = data.img_url;
+            document.getElementById(
+              "userName"
+            ).textContent = `Hi, ${data.username}`;
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("userInfo").style.display = "flex";
+            document.getElementById("dataSection").style.display = "block";
+            updateDateRange();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Failed to fetch user info. Please check your access token.");
+            localStorage.removeItem("rawdatApiOsmAccessToken");
+          });
+      }
+
+      function logout() {
+        localStorage.removeItem("rawdatApiOsmAccessToken");
+        document.getElementById("loginForm").style.display = "block";
+        document.getElementById("userInfo").style.display = "none";
+        document.getElementById("dataSection").style.display = "none";
+        document.getElementById("accessToken").value = "";
+      }
+
+      function updateDateRange() {
+        const groupBy = document.getElementById("quickDateSelect").value;
+        const endDate = new Date();
+        let startDate = new Date();
+
+        switch (groupBy) {
+          case "day":
+            startDate.setDate(endDate.getDate() - 1);
+            break;
+          case "month":
+            startDate.setMonth(endDate.getMonth() - 1);
+            break;
+          case "quarter":
+            startDate.setMonth(endDate.getMonth() - 3);
+            break;
+          case "year":
+            startDate.setFullYear(endDate.getFullYear() - 1);
+            break;
+        }
+
+        document.getElementById("startDate").valueAsDate = startDate;
+        document.getElementById("endDate").valueAsDate = endDate;
+      }
+
+      function fetchData() {
+        const token = localStorage.getItem("rawdatApiOsmAccessToken");
+        if (!token) {
+          alert("Please login first.");
+          return;
+        }
+
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        const groupBy = document.getElementById("groupBy").value;
+
+        const url = `${apiBaseUrl}/metrics/summary?start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`;
+
+        fetch(url, {
+          headers: {
+            accept: "application/json",
+            "access-token": token,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            chartData = data;
+            createMetricSelectors(data[0]);
+            createChart(data);
+            createTable(data);
+            document.getElementById("downloadBtn").style.display = "block";
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while fetching data.");
+          });
+      }
+
+      function createMetricSelectors(dataItem) {
+        const selector = document.getElementById("metricSelector");
+        selector.innerHTML = "";
+        Object.keys(dataItem).forEach((key) => {
+          if (key !== "kwdate") {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = key;
+            selector.appendChild(option);
+          }
+        });
+      }
+
+      function createChart(data) {
+        const ctx = document.getElementById("chartContainer");
+        ctx.innerHTML = "<canvas></canvas>";
+        const canvas = ctx.querySelector("canvas");
+
+        const metricSelector = document.getElementById("metricSelector");
+        const selectedMetric = metricSelector.value;
+
+        chart = new Chart(canvas, {
+          type: "line",
+          data: {
+            labels: data.map((item) => item.kwdate),
+            datasets: [
+              {
+                label: selectedMetric,
+                data: data.map((item) => item[selectedMetric]),
+                borderColor: getRandomColor(),
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            title: {
+              display: true,
+              text: "HOT OSM Metrics",
+            },
+            scales: {
+              x: {
+                display: true,
+                title: {
+                  display: true,
+                  text: "Date",
+                },
+              },
+              y: {
+                display: true,
+                title: {
+                  display: true,
+                  text: "Value",
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function updateChart() {
+        const selectedMetric = document.getElementById("metricSelector").value;
+        chart.data.datasets[0].label = selectedMetric;
+        chart.data.datasets[0].data = chartData.map(
+          (item) => item[selectedMetric]
+        );
+        chart.update();
+      }
+
+      function createTable(data) {
+        const tableContainer = document.getElementById("tableContainer");
+        tableContainer.innerHTML = "";
+
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const tbody = document.createElement("tbody");
+
+        // Create table header
+        const headerRow = document.createElement("tr");
+        Object.keys(data[0]).forEach((key) => {
+          const th = document.createElement("th");
+          th.textContent = key;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        // Create table body
+        data.forEach((item) => {
+          const row = document.createElement("tr");
+          Object.values(item).forEach((value) => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            row.appendChild(td);
+          });
+          tbody.appendChild(row);
+        });
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        tableContainer.appendChild(table);
+      }
+
+      function downloadCSV() {
+        const csv = Papa.unparse(chartData);
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", "raw_osm_data_metrics.csv");
+          link.style.visibility = "hidden";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+
+      function getRandomColor() {
+        return "#" + Math.floor(Math.random() * 16777215).toString(16);
+      }
+
+      // Set default dates and check for saved token
+      window.onload = function () {
+        updateDateRange();
+
+        // Check if token exists in localStorage
+        const savedToken = localStorage.getItem("rawdatApiOsmAccessToken");
+        if (savedToken) {
+          fetchUserInfo(savedToken);
+        }
+      };
+    </script>
+  </body>
+</html>
