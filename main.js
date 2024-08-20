@@ -29,6 +29,17 @@ function login() {
     alert("Please enter a valid token.");
   }
 }
+function get_role(role) {
+  if (role == 1) {
+    return "Admin";
+  }
+  if (role == 2) {
+    return "Staff";
+  }
+  if (role == 3) {
+    return "Guest";
+  }
+}
 
 function fetchUserInfo(token) {
   fetch(`${apiBaseUrl}/auth/me/`, {
@@ -40,7 +51,9 @@ function fetchUserInfo(token) {
     .then((response) => response.json())
     .then((data) => {
       document.getElementById("userImage").src = data.img_url;
-      document.getElementById("userName").textContent = `Hi, ${data.username}`;
+      document.getElementById("userName").textContent = `Hi, ${
+        data.username
+      } (${get_role(data.role)})`;
       document.getElementById("loginForm").style.display = "none";
       document.getElementById("userInfo").style.display = "flex";
       document.getElementById("dataSection").style.display = "block";
