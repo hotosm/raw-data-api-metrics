@@ -69,9 +69,11 @@
           </select>
         </div>
 
-        <button onclick="fetchData()">Fetch Data</button>
+        <button onclick="fetchData()" style="margin-bottom: 10px">
+          Fetch Data
+        </button>
         <div class="form-group" id="chartmetricselector" style="display: none">
-          <label for="metricSelector">Select Metric:</label>
+          <label for="metricSelector">Select Metric to Display in Chart</label>
           <select id="metricSelector" onchange="updateChart()"></select>
         </div>
         <div id="chartContainer"></div>
