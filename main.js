@@ -58,6 +58,7 @@ function logout() {
   document.getElementById("loginForm").style.display = "block";
   document.getElementById("userInfo").style.display = "none";
   document.getElementById("dataSection").style.display = "none";
+  document.getElementById("chartmetricselector").style.display = "none";
   document.getElementById("accessToken").value = "";
 }
 
@@ -111,6 +112,7 @@ function fetchData() {
       createChart(data);
       createTable(data);
       document.getElementById("downloadBtn").style.display = "block";
+      document.getElementById("chartmetricselector").style.display = "block";
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -147,7 +149,7 @@ function createChart(data) {
         {
           label: selectedMetric,
           data: data.map((item) => item[selectedMetric]),
-          borderColor: getRandomColor(),
+          borderColor: "#ff0000",
           fill: false,
         },
       ],
@@ -156,7 +158,7 @@ function createChart(data) {
       responsive: true,
       title: {
         display: true,
-        text: "HOT OSM Metrics",
+        text: "Raw Data API Metrics",
       },
       scales: {
         x: {
@@ -190,10 +192,12 @@ function createTable(data) {
   tableContainer.innerHTML = "";
 
   const table = document.createElement("table");
+  table.id = "metricsDataTable";
+  table.className = "display";
+  table.style = "width:100%";
   const thead = document.createElement("thead");
   const tbody = document.createElement("tbody");
 
-  // Create table header
   const headerRow = document.createElement("tr");
   Object.keys(data[0]).forEach((key) => {
     const th = document.createElement("th");
@@ -202,20 +206,18 @@ function createTable(data) {
   });
   thead.appendChild(headerRow);
 
-  // Create table body
-  data.forEach((item) => {
-    const row = document.createElement("tr");
-    Object.values(item).forEach((value) => {
-      const td = document.createElement("td");
-      td.textContent = value;
-      row.appendChild(td);
-    });
-    tbody.appendChild(row);
-  });
-
   table.appendChild(thead);
   table.appendChild(tbody);
   tableContainer.appendChild(table);
+
+  $(document).ready(function () {
+    $("#metricsDataTable").DataTable({
+      data: data,
+      responsive: true,
+      searching: false,
+      columns: Object.keys(data[0]).map((key) => ({ data: key })),
+    });
+  });
 }
 
 function downloadCSV() {
@@ -233,15 +235,9 @@ function downloadCSV() {
   }
 }
 
-function getRandomColor() {
-  return "#" + Math.floor(Math.random() * 16777215).toString(16);
-}
-
-// Set default dates and check for saved token
 window.onload = function () {
   updateDateRange();
 
-  // Check if token exists in localStorage
   const savedToken = localStorage.getItem("rawdatApiOsmAccessToken");
   if (savedToken) {
     fetchUserInfo(savedToken);

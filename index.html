@@ -7,6 +7,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" type="text/css" href="./style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/2.1.4/css/dataTables.dataTables.css"
+    />
+    <script
+      type="text/javascript"
+      charset="utf8"
+      src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"
+    ></script>
+    <script src="https://cdn.datatables.net/2.1.4/js/dataTables.js"></script>
   </head>
   <body>
     <div class="container">
@@ -60,7 +70,7 @@
         </div>
 
         <button onclick="fetchData()">Fetch Data</button>
-        <div class="form-group">
+        <div class="form-group" id="chartmetricselector" style="display: none">
           <label for="metricSelector">Select Metric:</label>
           <select id="metricSelector" onchange="updateChart()"></select>
         </div>
