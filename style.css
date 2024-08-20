@@ -57,6 +57,10 @@ th {
 #metricSelectors {
   margin-top: 15px;
 }
+#loginMessage {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 .metric-checkbox {
   margin-right: 10px;
 }

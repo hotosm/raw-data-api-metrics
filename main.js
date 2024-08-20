@@ -2,6 +2,24 @@ const apiBaseUrl = "https://api-prod.raw-data.hotosm.org/v1";
 let chartData = [];
 let chart;
 
+function generateAuthToken() {
+  const authLoginUrl = `${apiBaseUrl}/auth/login/`;
+  fetch(authLoginUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.login_url) {
+        const loginMessage = document.getElementById("loginMessage");
+        loginMessage.innerHTML = `<a href="${data.login_url}" target="_blank">Click here to login</a> and copy your token.`;
+      } else {
+        alert("Failed to generate login link. Please check the API base URL.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("An error occurred while generating the login link.");
+    });
+}
+
 function login() {
   const token = document.getElementById("accessToken").value;
   if (token) {
