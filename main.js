@@ -53,7 +53,7 @@ function fetchUserInfo(token) {
       document.getElementById("userImage").src = data.img_url;
       document.getElementById("userName").textContent = `Hi, ${
         data.username
-      } (${get_role(data.role)})`;
+      } - ${get_role(data.role)} (OSM ID : ${data.id})`;
       document.getElementById("loginForm").style.display = "none";
       document.getElementById("userInfo").style.display = "flex";
       document.getElementById("dataSection").style.display = "block";
