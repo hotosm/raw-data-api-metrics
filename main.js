@@ -118,7 +118,12 @@ function fetchData() {
       "access-token": token,
     },
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (response.status === 401) {
+        throw new Error("Unauthorized");
+      }
+      return response.json();
+    })
     .then((data) => {
       const processedData = data.map((item) => {
         if (item.kwdate) {
@@ -135,7 +140,13 @@ function fetchData() {
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("An error occurred while fetching data.");
+      if (error.message === "Unauthorized") {
+        alert(
+          "You don't have enough access. Please contact administrator for your access."
+        );
+      } else {
+        alert("An error occurred while fetching data.");
+      }
     });
 }
 
