@@ -107,10 +107,16 @@ function fetchData() {
   })
     .then((response) => response.json())
     .then((data) => {
-      chartData = data;
-      createMetricSelectors(data[0]);
-      createChart(data);
-      createTable(data);
+      const processedData = data.map((item) => {
+        if (item.kwdate) {
+          item.kwdate = item.kwdate.split("T")[0];
+        }
+        return item;
+      });
+      chartData = processedData;
+      createMetricSelectors(processedData[0]);
+      createChart(processedData);
+      createTable(processedData);
       document.getElementById("downloadBtn").style.display = "block";
       document.getElementById("chartmetricselector").style.display = "block";
     })
