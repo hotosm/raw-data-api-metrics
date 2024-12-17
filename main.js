@@ -109,8 +109,12 @@ function fetchData() {
   const startDate = document.getElementById("startDate").value;
   const endDate = document.getElementById("endDate").value;
   const groupBy = document.getElementById("groupBy").value;
+  const folder = document.getElementById("folderSelect").value;
 
-  const url = `${apiBaseUrl}/metrics/summary?start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`;
+  let url = `${apiBaseUrl}/metrics/summary?start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`;
+  if (folder != "all") {
+    url += `&folder=${folder}`;
+  }
 
   fetch(url, {
     headers: {
