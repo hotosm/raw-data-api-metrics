@@ -1,5 +1,6 @@
 const apiBaseUrl = "https://api-prod.raw-data.hotosm.org/v1";
 let chartData = [];
+let original_data;
 let chart;
 
 function generateAuthToken() {
@@ -129,12 +130,14 @@ function fetchData() {
       return response.json();
     })
     .then((data) => {
+      original_data = data;
       const processedData = data.map((item) => {
         if (item.kwdate) {
           item.kwdate = item.kwdate.split("T")[0];
         }
         return item;
       });
+
       chartData = processedData;
       createMetricSelectors(processedData[0]);
       createChart(processedData);
@@ -235,10 +238,25 @@ function createTable(data) {
   const headerRow = document.createElement("tr");
   Object.keys(data[0]).forEach((key) => {
     const th = document.createElement("th");
-    th.textContent = key;
+    th.textContent = key
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
     headerRow.appendChild(th);
   });
   thead.appendChild(headerRow);
+
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+    Object.keys(row).forEach((key) => {
+      const td = document.createElement("td");
+      const cellValue =
+        typeof row[key] === "object" ? JSON.stringify(row[key]) : row[key];
+      td.textContent = cellValue;
+      td.title = cellValue; // Add tooltip
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
 
   table.appendChild(thead);
   table.appendChild(tbody);
@@ -246,16 +264,17 @@ function createTable(data) {
 
   $(document).ready(function () {
     $("#metricsDataTable").DataTable({
-      data: data,
       responsive: true,
-      searching: false,
+      searching: true,
+      scrollY: "50vh",
+      scrollCollapse: true,
       columns: Object.keys(data[0]).map((key) => ({ data: key })),
     });
   });
 }
 
 function downloadCSV() {
-  const csv = Papa.unparse(chartData);
+  const csv = Papa.unparse(original_data);
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   if (link.download !== undefined) {
