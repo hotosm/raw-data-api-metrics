@@ -224,6 +224,14 @@ function updateChart() {
   chart.update();
 }
 
+function formatBytes(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
 function createTable(data) {
   const tableContainer = document.getElementById("tableContainer");
   tableContainer.innerHTML = "";
@@ -249,8 +257,12 @@ function createTable(data) {
     const tr = document.createElement("tr");
     Object.keys(row).forEach((key) => {
       const td = document.createElement("td");
-      const cellValue =
-        typeof row[key] === "object" ? JSON.stringify(row[key]) : row[key];
+      let cellValue = row[key];
+      if (key.toLowerCase().includes("size")) {
+        cellValue = formatBytes(cellValue);
+      } else if (typeof cellValue === "object") {
+        cellValue = JSON.stringify(cellValue);
+      }
       td.textContent = cellValue;
       td.title = cellValue; // Add tooltip
       tr.appendChild(td);
