@@ -161,7 +161,7 @@ function createMetricSelectors(dataItem) {
   const selector = document.getElementById("metricSelector");
   selector.innerHTML = "";
   Object.keys(dataItem).forEach((key) => {
-    if (key !== "kwdate") {
+    if (key !== "kwdate" && typeof dataItem[key] !== "object") {
       const option = document.createElement("option");
       option.value = key;
       option.textContent = key;
