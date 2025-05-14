@@ -12,6 +12,7 @@
     />
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" type="text/css" href="./style.css" />
   </head>
   <body>
@@ -45,6 +46,19 @@
           <button class="btn secondary" onclick="logout()">Logout</button>
         </div>
       </section>
+
+      <div id="tabsContainer" class="tabs-container" style="display: none">
+        <button
+          id="summaryTab"
+          class="tab-btn active"
+          onclick="showTab('summary')"
+        >
+          Summary Metrics
+        </button>
+        <button id="metadataTab" class="tab-btn" onclick="showTab('metadata')">
+          File Downloads
+        </button>
+      </div>
 
       <!-- Data Controls Section -->
       <section id="dataSection" class="card" style="display: none">
@@ -132,6 +146,80 @@
         <button class="btn secondary" id="downloadBtn" onclick="downloadCSV()">
           Download CSV
         </button>
+      </section>
+      <section id="metadataSection" class="card" style="display: none">
+        <h2>File Downloads Metadata</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="metaStartDate">Start Date:</label>
+            <input type="date" id="metaStartDate" />
+          </div>
+
+          <div class="form-group">
+            <label for="metaEndDate">End Date:</label>
+            <input type="date" id="metaEndDate" />
+          </div>
+
+          <div class="form-group">
+            <label for="metaGroupBy">Group By:</label>
+            <select id="metaGroupBy">
+              <option value="day">Day</option>
+              <option value="month" selected>Month</option>
+              <option value="quarter">Quarter</option>
+              <option value="year">Year</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="keyPrefixInput">Filter by Key Prefix:</label>
+          <input
+            type="text"
+            id="keyPrefixInput"
+            placeholder="e.g. ISO3/IRN/,ISO3/NPL/"
+            class="search-input"
+          />
+          <small
+            >Separate multiple prefixes with commas (e.g.,
+            ISO3/,HDX/,TM/)</small
+          >
+        </div>
+
+        <button class="btn primary" onclick="fetchMetadata()">
+          Fetch File Metadata
+        </button>
+
+        <div
+          id="metadataLoadingSpinner"
+          class="spinner-container"
+          style="display: none"
+        >
+          <div class="spinner"></div>
+          <p>Loading metadata...</p>
+        </div>
+      </section>
+
+      <section id="metadataResultsSection" class="card" style="display: none">
+        <h2>File Download Statistics</h2>
+
+        <h3>Most Downloaded Files</h3>
+        <div id="treemapContainer" class="chart-container"></div>
+        <div
+          id="tooltip"
+          style="
+            position: absolute;
+            display: none;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          "
+        ></div>
+
+        <h3>File Details</h3>
+        <div id="metadataTableContainer" class="table-container"></div>
       </section>
     </div>
     <script src="main.js"></script>
