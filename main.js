@@ -99,7 +99,6 @@ function updateDateRange() {
   document.getElementById("startDate").valueAsDate = startDate;
   document.getElementById("endDate").valueAsDate = endDate;
 }
-
 function fetchData() {
   const token = localStorage.getItem("rawdatApiOsmAccessToken");
   if (!token) {
@@ -110,12 +109,32 @@ function fetchData() {
   const startDate = document.getElementById("startDate").value;
   const endDate = document.getElementById("endDate").value;
   const groupBy = document.getElementById("groupBy").value;
-  const folder = document.getElementById("folderSelect").value;
 
+  // Get multiple folder selections
+  const folderSelect = document.getElementById("folderSelect");
+  const selectedOptions = Array.from(folderSelect.selectedOptions).map(
+    (option) => option.value
+  );
+
+  const allSelected = selectedOptions.includes("all");
+
+  // If "all" is not selected, use the selected folders
+  const selectedFolders = allSelected ? [] : selectedOptions;
+
+  // Get checkbox values
+  const includeLocations = document.getElementById("includeLocations").checked;
+  const includeReferrers = document.getElementById("includeReferrers").checked;
+
+  // Build the URL
   let url = `${apiBaseUrl}/metrics/summary?start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`;
-  if (folder != "all") {
-    url += `&folder=${folder}`;
+
+  // Add folders if any are selected
+  if (selectedFolders.length > 0) {
+    url += `&folders=${selectedFolders.join(",")}`;
   }
+
+  // Add optional parameters
+  url += `&include_locations=${includeLocations}&include_referrers=${includeReferrers}`;
 
   fetch(url, {
     headers: {

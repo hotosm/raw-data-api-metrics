@@ -69,14 +69,27 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="folderSelect">Select Project:</label>
-          <select id="folderSelect">
-            <option value="all" selected>All</option>
+          <label for="folderSelect">Select Projects:</label>
+          <select id="folderSelect" multiple>
+            <option value="all">All</option>
             <option value="default">Default</option>
             <option value="TM">TM</option>
             <option value="HDX">HDX</option>
             <option value="ISO3">ISO3</option>
           </select>
+          <small>Hold Ctrl/Cmd to select multiple</small>
+        </div>
+        <div class="form-group">
+          <label
+            ><input type="checkbox" id="includeLocations" /> Include
+            Locations</label
+          >
+        </div>
+        <div class="form-group">
+          <label
+            ><input type="checkbox" id="includeReferrers" /> Include
+            Referrers</label
+          >
         </div>
 
         <button onclick="fetchData()" style="margin-bottom: 10px">
