@@ -6,25 +6,28 @@
     <title>Raw Data API Metrics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="./style.css" />
     <link
       rel="stylesheet"
       href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"
     />
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"
-    ></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
   </head>
   <body>
     <div class="container">
-      <h1>Raw Data Metrics</h1>
-      <div id="loginSection">
-        <div id="loginForm">
-          <button onclick="generateAuthToken()">Generate Login Link</button>
-          <div id="loginMessage"></div>
+      <header>
+        <h1>Raw Data Metrics</h1>
+      </header>
+
+      <!-- Login Section -->
+      <section id="loginSection">
+        <div id="loginForm" class="card">
+          <h2>Authentication</h2>
+          <button class="btn primary" onclick="generateAuthToken()">
+            Generate Login Link
+          </button>
+          <div id="loginMessage" class="message-box"></div>
           <div class="form-group">
             <label for="accessToken">Access Token:</label>
             <input
@@ -33,44 +36,56 @@
               placeholder="Paste your access token here"
             />
           </div>
-          <button onclick="login()">Login</button>
+          <button class="btn primary" onclick="login()">Login</button>
         </div>
-        <div id="userInfo" style="display: none">
-          <img id="userImage" src="" alt="Profile Picture" />
+
+        <div id="userInfo" class="user-panel" style="display: none">
+          <img id="userImage" src="" alt="Profile" />
           <span id="userName"></span>
-          <button onclick="logout()" style="margin-left: 10px">Logout</button>
+          <button class="btn secondary" onclick="logout()">Logout</button>
         </div>
-      </div>
-      <div id="dataSection" style="display: none">
-        <div class="form-group">
-          <label for="quickDateSelect">Select Date Range:</label>
-          <select id="quickDateSelect" onchange="updateDateRange()">
-            <option value="day">Last Day</option>
-            <option value="month" selected>Last Month</option>
-            <option value="quarter">Last Quarter</option>
-            <option value="year">Last Year</option>
-          </select>
+      </section>
+
+      <!-- Data Controls Section -->
+      <section id="dataSection" class="card" style="display: none">
+        <h2>Filter Options</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quickDateSelect">Date Range:</label>
+            <select id="quickDateSelect" onchange="updateDateRange()">
+              <option value="day">Last Day</option>
+              <option value="month" selected>Last Month</option>
+              <option value="quarter">Last Quarter</option>
+              <option value="year">Last Year</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="groupBy">Group By:</label>
+            <select id="groupBy">
+              <option value="day" selected>Day</option>
+              <option value="month">Month</option>
+              <option value="quarter">Quarter</option>
+              <option value="year">Year</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="startDate">Start Date:</label>
-          <input type="date" id="startDate" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" />
+          </div>
         </div>
-        <div class="form-group">
-          <label for="endDate">End Date:</label>
-          <input type="date" id="endDate" />
-        </div>
-        <div class="form-group">
-          <label for="groupBy">Group By:</label>
-          <select id="groupBy">
-            <option value="day" selected>Day</option>
-            <option value="month">Month</option>
-            <option value="quarter">Quarter</option>
-            <option value="year">Year</option>
-          </select>
-        </div>
+
         <div class="form-group">
           <label for="folderSelect">Select Projects:</label>
-          <select id="folderSelect" multiple>
+          <select id="folderSelect" multiple class="multi-select">
             <option value="all">All</option>
             <option value="default">Default</option>
             <option value="TM">TM</option>
@@ -79,32 +94,45 @@
           </select>
           <small>Hold Ctrl/Cmd to select multiple</small>
         </div>
-        <div class="form-group">
-          <label
-            ><input type="checkbox" id="includeLocations" /> Include
-            Locations</label
-          >
-        </div>
-        <div class="form-group">
-          <label
-            ><input type="checkbox" id="includeReferrers" /> Include
-            Referrers</label
-          >
+
+        <div class="form-row checkbox-row">
+          <div class="form-group checkbox">
+            <input type="checkbox" id="includeLocations" />
+            <label for="includeLocations">Include Locations</label>
+          </div>
+
+          <div class="form-group checkbox">
+            <input type="checkbox" id="includeReferrers" />
+            <label for="includeReferrers">Include Referrers</label>
+          </div>
         </div>
 
-        <button onclick="fetchData()" style="margin-bottom: 10px">
-          Fetch Data
-        </button>
-        <div class="form-group" id="chartmetricselector" style="display: none">
-          <label for="metricSelector">Select Metric to Display in Chart</label>
+        <button class="btn primary" onclick="fetchData()">Fetch Data</button>
+        <div
+          id="loadingSpinner"
+          class="spinner-container"
+          style="display: none"
+        >
+          <div class="spinner"></div>
+          <p>Loading data...</p>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section id="resultsSection" class="card" style="display: none">
+        <div class="form-group" id="chartmetricselector">
+          <label for="metricSelector">Select Metric to Display:</label>
           <select id="metricSelector" onchange="updateChart()"></select>
         </div>
-        <div id="chartContainer"></div>
-        <div id="tableContainer"></div>
-        <button onclick="downloadCSV()" id="downloadBtn" style="display: none">
+
+        <div id="chartContainer" class="chart-container"></div>
+
+        <div id="tableContainer" class="table-container"></div>
+
+        <button class="btn secondary" id="downloadBtn" onclick="downloadCSV()">
           Download CSV
         </button>
-      </div>
+      </section>
     </div>
     <script src="main.js"></script>
   </body>

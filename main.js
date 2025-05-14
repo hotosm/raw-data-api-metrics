@@ -72,7 +72,7 @@ function logout() {
   document.getElementById("loginForm").style.display = "block";
   document.getElementById("userInfo").style.display = "none";
   document.getElementById("dataSection").style.display = "none";
-  document.getElementById("chartmetricselector").style.display = "none";
+  document.getElementById("resultsSection").style.display = "none"; // Hide results section
   document.getElementById("accessToken").value = "";
 }
 
@@ -105,6 +105,8 @@ function fetchData() {
     alert("Please login first.");
     return;
   }
+  // Show loading spinner
+  document.getElementById("loadingSpinner").style.display = "flex";
 
   const startDate = document.getElementById("startDate").value;
   const endDate = document.getElementById("endDate").value;
@@ -149,6 +151,8 @@ function fetchData() {
       return response.json();
     })
     .then((data) => {
+      document.getElementById("loadingSpinner").style.display = "none";
+
       original_data = data;
       const processedData = data.map((item) => {
         if (item.kwdate) {
@@ -161,10 +165,13 @@ function fetchData() {
       createMetricSelectors(processedData[0]);
       createChart(processedData);
       createTable(processedData);
+      document.getElementById("resultsSection").style.display = "block";
       document.getElementById("downloadBtn").style.display = "block";
       document.getElementById("chartmetricselector").style.display = "block";
     })
     .catch((error) => {
+      document.getElementById("loadingSpinner").style.display = "none";
+
       console.error("Error:", error);
       if (error.message === "Unauthorized") {
         alert(
